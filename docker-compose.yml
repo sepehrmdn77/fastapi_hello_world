@@ -1,0 +1,101 @@
+services:
+  traefik:
+    image: traefik:v3.4
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # - "--certificatesresolvers.le.acme.email=maadanisepehr@gmail.com"
+      # - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
+      # - "--certificatesresolvers.le.acme.httpchallenge=true"
+      # - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
+
+
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.yml:/etc/traefik/traefik.yml
+      - ./letsencrypt:/letsencrypt
+    networks:
+      - app_network
+
+  db:
+    image: postgres:15-alpine
+    restart: always
+    container_name: db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres", "-d", "postgres"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+    networks:
+      - app_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: backend
+    command: |
+      bash -c 'fastapi dev --host 0.0.0.0 --port 8000'
+    volumes:
+      - ./app:/usr/src/core
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      POSTGRES_DATABASE_URL: postgresql://postgres:postgres@db:5432/postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres", "-d", "postgres"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.localhost`)"  # for now untill getting domain
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      # - "traefik.http.routers.backend.tls.certresolver=le"
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+    networks:
+      - app_network
+    
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+    container_name: frontend
+    command: bash -c 'flet run --web --port 8200 ./hello_world/src/main.py'
+    volumes:
+      - ./ui:/usr/src/core
+    ports:
+      - "8200:8200"
+    depends_on:
+      - db
+      - backend
+    networks:
+      - app_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`localhost`)"  # for now untill getting domain
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      # - "traefik.http.routers.frontend.tls.certresolver=le"
+      - "traefik.http.services.frontend.loadbalancer.server.port=8200"
+networks:
+  app_network:
+    driver: bridge
