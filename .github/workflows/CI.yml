@@ -38,7 +38,7 @@ jobs:
 
       - name: creating .env file
         run: |
-          echo "SQLALCHEMY_DATABASE_URL=sqlite:///:memory:" >> .env
+          export SQLALCHEMY_DATABASE_URL=sqlite:///:memory:
 
       - name: Lint with flake8
         run: |
