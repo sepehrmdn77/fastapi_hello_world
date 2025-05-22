@@ -9,7 +9,7 @@ services:
       - "--certificatesresolvers.le.acme.email=yourname@example.com"
       - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
       - "--certificatesresolvers.le.acme.httpchallenge=true"
-      - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=websecure"
+      - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
     ports:
       - "80:80"
       - "443:443"
@@ -67,7 +67,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`api.domain.com`)"  # domain with prefix
-      - "traefik.http.routers.backend.entrypoints=websecure"  # we can activate https with SSL certs
+      - "traefik.http.routers.backend.entrypoints=web"  # we can activate https with SSL certs
       - "traefik.http.routers.backend.tls.certresolver=le"
       - "traefik.http.services.backend.loadbalancer.server.port=8000"
       - "traefik.http.routers.backend.rule=PathPrefix(`/`)"
@@ -104,7 +104,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`domain.com`)"  # main domain here
-      - "traefik.http.routers.frontend.entrypoints=websecure"  # we can activate https with SSL certs
+      - "traefik.http.routers.frontend.entrypoints=web"  # we can activate https with SSL certs
       - "traefik.http.routers.frontend.tls.certresolver=le"
       - "traefik.http.services.frontend.loadbalancer.server.port=8200"
       - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
