@@ -1,0 +1,7 @@
+---
+- hosts: EC2_instance
+  become: yes
+  roles:
+  - docker_install
+  - docker_file
+  - docker_compose_run

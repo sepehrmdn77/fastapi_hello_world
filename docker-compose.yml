@@ -6,12 +6,10 @@ services:
       - "--providers.docker=true"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-      # - "--certificatesresolvers.le.acme.email=maadanisepehr@gmail.com"
-      # - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
-      # - "--certificatesresolvers.le.acme.httpchallenge=true"
-      # - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
-
-
+      - "--certificatesresolvers.le.acme.email=yourname@example.com"
+      - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.le.acme.httpchallenge=true"
+      - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=websecure"
     ports:
       - "80:80"
       - "443:443"
@@ -49,8 +47,8 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     container_name: backend
-    command: |
-      bash -c 'fastapi dev --host 0.0.0.0 --port 8000'
+    command: >
+      bash -c "alembic upgrade heads && fastapi dev --host 0.0.0.0 --port 8000"
     volumes:
       - ./app:/usr/src/core
     ports:
@@ -61,20 +59,33 @@ services:
     environment:
       POSTGRES_DATABASE_URL: postgresql://postgres:postgres@db:5432/postgres
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres", "-d", "postgres"]
+      test: ["CMD", "curl", "-f", "http://backend:8000/docs"]
       interval: 10s
       timeout: 5s
       start_period: 30s
       retries: 5
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`api.localhost`)"  # for now untill getting domain
-      - "traefik.http.routers.backend.entrypoints=websecure"
-      # - "traefik.http.routers.backend.tls.certresolver=le"
+      - "traefik.http.routers.backend.rule=Host(`api.domain.com`)"  # domain with prefix
+      - "traefik.http.routers.backend.entrypoints=websecure"  # we can activate https with SSL certs
+      - "traefik.http.routers.backend.tls.certresolver=le"
       - "traefik.http.services.backend.loadbalancer.server.port=8000"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/`)"
     networks:
       - app_network
-    
+
+# init:
+#   image: curlimages/curl:latest
+#   container_name: init_request
+#   depends_on:
+#     - backend
+#   command: >
+#     sh -c "until curl -s http://backend:8000/docs; do echo waiting for backend...; sleep 3; done &&
+#     curl -X POST http://backend:8000/hello_world
+#     -H 'accept: application/json'
+#     -H 'Content-Type: application/json'
+#     -d '{\"text\": \"Hello World!\"}'"
+
   frontend:
     build:
       context: .
@@ -84,7 +95,7 @@ services:
     volumes:
       - ./ui:/usr/src/core
     ports:
-      - "8200:8200"
+      - "8200"  # for test
     depends_on:
       - db
       - backend
@@ -92,10 +103,11 @@ services:
       - app_network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`localhost`)"  # for now untill getting domain
-      - "traefik.http.routers.frontend.entrypoints=websecure"
-      # - "traefik.http.routers.frontend.tls.certresolver=le"
+      - "traefik.http.routers.frontend.rule=Host(`domain.com`)"  # main domain here
+      - "traefik.http.routers.frontend.entrypoints=websecure"  # we can activate https with SSL certs
+      - "traefik.http.routers.frontend.tls.certresolver=le"
       - "traefik.http.services.frontend.loadbalancer.server.port=8200"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
 networks:
   app_network:
     driver: bridge

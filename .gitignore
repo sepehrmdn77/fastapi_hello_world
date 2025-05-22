@@ -220,3 +220,14 @@ cython_debug/
 .pytest_cache/
 __pycache__/
 
+
+*.pem
+*.csv
+
+*.lock.hcl
+*.tfstate
+*.backup
+*.info
+.vscode
+.terraform
+acme.json.me

@@ -1,0 +1,22 @@
+---
+- name: "Creating app directory if it does not exist"
+  ansible.builtin.file:
+    path: /home/ubuntu/app
+    state: directory
+    mode: '0755'
+    owner: "ubuntu"
+
+- name: "Copy items"
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0755'
+  with_items:
+    - { src: '../app', dest: '/home/ubuntu/app/' }
+    - { src: '../letsencrypt', dest: '/home/ubuntu/app/' }
+    - { src: '../ui', dest: '/home/ubuntu/app/' }
+    - { src: '../docker-compose.yml', dest: '/home/ubuntu/app/' }
+    - { src: '../Dockerfile.dev', dest: '/home/ubuntu/app/' }
+    - { src: '../Dockerfile.ui', dest: '/home/ubuntu/app/' }
+    - { src: '../requirements.txt', dest: '/home/ubuntu/app/' }
+    - { src: '../traefik.yml', dest: '/home/ubuntu/app/' }

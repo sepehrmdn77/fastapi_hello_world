@@ -35,10 +35,10 @@ entryPoints:
 ################################################################
 # https certificates
 ################################################################
-# certificatesResolvers:
-#   le:
-#     acme:
-#       email: maadanisepehr@gmail.com
-#       storage: /letsencrypt/acme.json
-#       tlsChallenge: {}
+certificatesResolvers:
+  le:
+    acme:
+      email: youremail@example.com
+      storage: /letsencrypt/acme.json
+      tlsChallenge: {}
       

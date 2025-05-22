@@ -1,0 +1,14 @@
+---
+- name: "Run Docker Compose"
+  community.docker.docker_compose_v2:
+    project_src: /home/ubuntu/app/
+    build: always
+    pull: missing
+    recreate: always
+    state: present
+  tags:
+    - deploy
+
+- name: Show output
+  ansible.builtin.debug:
+    msg:  "The compose is running and accessible on ports: 80, 8080, 5432, 8000, 443"
