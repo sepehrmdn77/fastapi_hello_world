@@ -7,7 +7,7 @@ The entire deployment and setup process on the target AWS instance is fully auto
 ---
 
 ## 📸 Screenshot
-![App screen](ui/hello_world/src/assets/App_test.png)
+![App screen](./ui/hello_world/src/assets/app_test.png)
 
 ---
 
