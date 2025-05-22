@@ -12,6 +12,8 @@ jobs:
   test-and-lint:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      POSTGRES_DATABASE_URL: "sqlite:///:memory:"
 
     steps:
       - name: Checkout repository
@@ -35,9 +37,9 @@ jobs:
           pip install --upgrade pip
           pip install setuptools fastapi[all] sqlalchemy pytest flake8 pylint requests
 
-      - name: creating .env file
-        run: |
-          export POSTGRES_DATABASE_URL="sqlite:///:memory:"
+      # - name: creating .env file
+      #   run: |
+      #     echo POSTGRES_DATABASE_URL="sqlite:///:memory:" >> .env
 
       - name: Lint with flake8
         run: |
