@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install -r fastapi[all] pytest flake8 pylint requests setuptools
+          pip install -r fastapi pytest flake8 pylint requests setuptools
           pip install flake8 pytest
 
       - name: creating .env file
