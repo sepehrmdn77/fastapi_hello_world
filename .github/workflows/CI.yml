@@ -37,7 +37,7 @@ jobs:
 
       - name: creating .env file
         run: |
-          export POSTGRES_DATABASE_URL=sqlite:///:memory:
+          export POSTGRES_DATABASE_URL="sqlite:///:memory:"
 
       - name: Lint with flake8
         run: |
