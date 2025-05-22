@@ -45,7 +45,7 @@ def override_dependencies(db_session):
 @pytest.fixture(scope="session", autouse=True)
 def tearup_and_down_db():
     '''for tests in local env export env variables in terminal:
-        export SQLALCHEMY_DATABASE_URL="sqlite:///:memory:"
+        export POSTGRES_DATABASE_URL="sqlite:///:memory:"
         export JWT_SECRET_KEY="test"'''
     Base.metadata.create_all(bind=engine)
     yield
