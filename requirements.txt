@@ -4,7 +4,7 @@ argcomplete==3.1.4
 astroid==3.0.2
 attrs==23.2.0
 Babel==2.10.3
-bcc==0.29.1
+bcc
 bcrypt==3.2.2
 black==24.2.0
 blinker==1.7.0
